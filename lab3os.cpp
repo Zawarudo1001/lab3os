@@ -1,16 +1,18 @@
-﻿#include <iostream>
+#include <iostream>
 #include <mutex>
 #include <thread>
 #include <windows.h>
 #include <queue>
 #include <vector>
 #include <random>
+#include <chrono>
 
 using namespace std;
 
 random_device rd;
 mt19937 gen(rd());
 uniform_int_distribution<> dist(1, 100);
+uniform_int_distribution<> sleep(300, 500);
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 class ConsumerProducerModel {
@@ -37,7 +39,7 @@ public:
 				SetConsoleTextAttribute(hConsole, 10);
 				cout << "На конвейер был добавлен элемент " << elem << " всего элементов: " << products.size() << endl;
 				ulock.unlock();
-				Sleep(500);
+				this_thread::sleep_for(std::chrono::milliseconds(sleep(gen)));
 			}
 		}
 	}
@@ -50,7 +52,7 @@ public:
 			SetConsoleTextAttribute(hConsole, 12);
 			cout << "С конвейера был взят элемент: " << elem << " всего элементов: " << products.size() << endl;
 			ulock.unlock();
-			Sleep(500);
+			this_thread::sleep_for(std::chrono::milliseconds(sleep(gen)));
 		}
 	}
 };
@@ -72,7 +74,7 @@ public:
 		}
 
 		StopConvair = true;
-
+		
 		for (int i = 0; i < ProducerCount; i++) {
 			if (Producers.at(i).joinable()) Producers.at(i).join();
 		}
@@ -80,6 +82,7 @@ public:
 		for (int i = 0; i < ConsumerCount; i++) {
 			if (Consumers.at(i).joinable()) Consumers.at(i).join();
 		}
+		
 	};
 };
 
